@@ -47,10 +47,10 @@ class ProductServices:
         product_queries.add_product(new_product,db)
         return new_product
     
-    def update_product(name,price,description,discount,quantity,files,user_data,db):
+    def update_product(product_id,name,price,description,discount,quantity,files,user_data,db):
         if user_data['is_admin'] is False:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admins can update products")
-        product_details = product_queries.get_product_by_id(id,db)
+        product_details = product_queries.get_product_by_id(product_id,db)
 
         if product_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Product with this id doesn't Exists!")

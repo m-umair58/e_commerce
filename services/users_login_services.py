@@ -11,11 +11,11 @@ class users_login_services:
         if user_details is None:
             raise HTTPException(status_code=404,detail="Email is Incorrect")
         
-        if not verify_password(Password,user_details.user_password):
+        if not verify_password(Password,user_details.password):
             raise HTTPException(status_code=404,detail="Password is Incorrect")
         
         user_show=UserOut(
-            id=user_details.user_id,
-            name=user_details.user_name
+            id=user_details.id,
+            name=user_details.name
         )
         return user_show

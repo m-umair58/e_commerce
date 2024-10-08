@@ -29,6 +29,7 @@ async def create_product(
 
 @router.put('/update')
 async def update_product(
+    product_id: int = Form(...),
     name: str = Form(...),
     price: float = Form(...),
     description: str = Form(None),
@@ -37,7 +38,7 @@ async def update_product(
     files: List[UploadFile] = File(...),
     user_data = Depends(get_user_info),
     db:Session = Depends(get_db)):
-    return ProductServices.update_product(name,price,description,discount,quantity,user_data,files,db)
+    return ProductServices.update_product(product_id,name,price,description,discount,quantity,files,user_data,db)
 
 @router.delete('/delete')
 async def create_product(product_id,

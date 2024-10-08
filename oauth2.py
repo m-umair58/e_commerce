@@ -27,7 +27,7 @@ async def get_user_info(credentials: HTTPAuthorizationCredentials = Security(bea
         userid: int = payload.get("user_id")
         is_admin: bool = payload.get("is_admin")
         
-        if is_admin is None or userid is None:
+        if userid is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
         
         return {"is_admin": is_admin, "id": userid}

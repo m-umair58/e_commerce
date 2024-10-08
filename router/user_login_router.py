@@ -5,7 +5,7 @@ from oauth2 import create_access_token
 from sqlalchemy.orm import Session
 from database import get_db
 
-router = APIRouter()
+router = APIRouter(prefix="/user")
 
 @router.post('/token')
 async def login(User_name,Password,db:Session=Depends(get_db)):

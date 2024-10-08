@@ -20,7 +20,7 @@ class RatingServices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Rating with this id doesn't exists!")
         return rating_data
         
-    def create_rating(product_id, user_id, details, score, files, user_data, db):
+    def create_rating(product_id, details, score, files, user_data, db):
         if user_data['is_admin'] is True:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only Users can update products")
         if score < 1 or score > 5:
@@ -41,7 +41,7 @@ class RatingServices:
         
         new_rating = Rating(
             product_id=product_id,
-            user_id=user_id,
+            user_id=user_data['user_id'],
             images=image_urls,
             details=details,
             rating_points=score
@@ -52,7 +52,7 @@ class RatingServices:
         return {"Details": "New rating has been added"}
 
     
-    def update_rating(product_id,user_id,details,score,files,user_data,db):
+    def update_rating(product_id,details,score,files,user_data,db):
         if user_data['is_admin'] is True:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only Users can update products")
         rating_details = rating_queries.get_rating_by_id(id,db)
@@ -71,7 +71,7 @@ class RatingServices:
 
 
         rating_details.product_id=product_id
-        rating_details.user_id = user_id
+        rating_details.user_id = user_data['user_id']
         rating_details.details = details
         rating_details.images = image_urls
         rating_details.rating_points = score

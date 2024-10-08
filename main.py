@@ -6,7 +6,7 @@ from models.admin_model import Base as AdminBase
 from models.order_model import Base as OrderBase
 from models.rating_model import Base as RatingBase
 from models.products_model import Base as ProductsBase
-from router import user_router,admin_router,product_router,rating_router,order_router
+from router import user_router,admin_router,product_router,rating_router,order_router,user_login_router,admin_login_router
 
 UserBase.metadata.create_all(bind=engine)
 CartBase.metadata.create_all(bind=engine)
@@ -17,6 +17,8 @@ ProductsBase.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.include_router(user_login_router.router)
+app.include_router(admin_login_router.router)
 app.include_router(user_router.router)
 app.include_router(admin_router.router)
 app.include_router(product_router.router)

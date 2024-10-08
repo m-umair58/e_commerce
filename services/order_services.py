@@ -8,15 +8,16 @@ from models.order_item import OrderItem
 from schemas.order_schema import OrderCreate
 
 class OrderServices:
-    def get_order_by_id(order_id,db):
+    def get_order_by_id(order_id,user_data,db):
         order_details = order_queries.get_order_by_id(order_id,db)
+        if order_details.user_id != user_data['user_id']:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="User doesn't have this order!s")
         order_items_details = order_item_queries.get_order_item_by_order_id(order_details.id,db)
         return order_details,order_items_details
-    def create_order(order:OrderCreate,db):
+    def create_order(order:OrderCreate,user_data,db):
         total_amount = 0
-
         new_order = Order(
-            user_id=order.user_id,
+            user_id=user_data["id"],
             order_date=order.order_date,
             payment_method=order.payment_method,
             total_amount=0,
@@ -58,10 +59,13 @@ class OrderServices:
 
         return new_order
     
-    def delete_order(order_id,db):
+    def delete_order(order_id,user_data,db):
         order_details = order_queries.get_order_by_id(order_id,db)
         if order_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Order doesn't exists")
+        if order_details.user_id != user_data['user_id']:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="this order doesnt  belong to this user")
+
         if order_details.delivery_status is "delivered":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Order has already been delivered!")
         order_queries.delete_order(order_details,db)
