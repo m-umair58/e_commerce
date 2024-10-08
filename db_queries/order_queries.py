@@ -16,3 +16,9 @@ class order_queries:
     def delete_order(order,db:Session):
         db.delete(order)
         db.commit()
+
+    def flush(db:Session):
+        db.flush()
+
+    def refresh(order,db:Session):
+        db.refresh(order)

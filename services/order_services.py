@@ -26,7 +26,7 @@ class OrderServices:
             shipping_cost=order.shipping_cost
         )
         order_queries.add_order(new_order,db)
-        db.flush()
+        order_queries.flush(db)
 
         for item in order.order_items:
             product = product_queries.get_product_by_id(item.product_id,db)
@@ -49,11 +49,12 @@ class OrderServices:
                 product_id=item.product_id,
                 quantity=item.quantity
             )
-            db.add(order_item)
+            order_item_queries.add_order_item(order_item,db)
         
         new_order.total_amount = total_amount + order.shipping_cost
-        db.commit()
-        db.refresh(new_order)
+        order_queries.commit(db)
+        
+        order_queries.refresh(new_order,db)
 
         return new_order
     
