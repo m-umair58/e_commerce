@@ -5,6 +5,7 @@ from services.product_services import ProductServices
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from database import get_db
+from oauth2 import get_user_info
 
 router = APIRouter(prefix='/product',tags=['Product'])
 
@@ -22,8 +23,9 @@ async def create_product(
     discount: float = Form(0.0),
     quantity: int = Form(...),
     files: List[UploadFile] = File(...),
+    user_data = Depends(get_user_info),
     db:Session = Depends(get_db)):
-    return ProductServices.create_product(name,price,description,discount,quantity,files,db)
+    return ProductServices.create_product(name,price,description,discount,quantity,files,user_data,db)
 
 @router.put('/update')
 async def update_product(
@@ -33,9 +35,12 @@ async def update_product(
     discount: float = Form(0.0),
     quantity: int = Form(...),
     files: List[UploadFile] = File(...),
+    user_data = Depends(get_user_info),
     db:Session = Depends(get_db)):
-    return ProductServices.update_product(name,price,description,discount,quantity,files,db)
+    return ProductServices.update_product(name,price,description,discount,quantity,user_data,files,db)
 
 @router.delete('/delete')
-async def create_product(product_id,db:Session = Depends(get_db)):
-    return ProductServices.delete_product(product_id,db)
+async def create_product(product_id,
+    user_data = Depends(get_user_info),
+    db:Session = Depends(get_db)):
+    return ProductServices.delete_product(product_id,user_data,db)

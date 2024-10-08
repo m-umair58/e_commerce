@@ -18,7 +18,9 @@ class ProductServices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Product with this id doesn't exists!")
         return product_data
         
-    def create_product(name,price,description,discount,quantity,files,db):
+    def create_product(name,price,description,discount,quantity,files,user_data,db):
+        if user_data['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admins can add products")
         image_urls = []
         for file in files:
             upload_result = cloudinary.uploader.upload(file.file)
@@ -45,7 +47,9 @@ class ProductServices:
         product_queries.add_product(new_product,db)
         return new_product
     
-    def update_product(name,price,description,discount,quantity,files,db):
+    def update_product(name,price,description,discount,quantity,files,user_data,db):
+        if user_data['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admins can update products")
         product_details = product_queries.get_product_by_id(id,db)
 
         if product_details is None:
@@ -67,7 +71,9 @@ class ProductServices:
 
         return {"Details":"Product details have been updated"}
     
-    def delete_product(product_id,db):
+    def delete_product(product_id,user_data,db):
+        if user_data['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admins can delete products")
         product_details = product_queries.get_product_by_id(product_id,db)
         if product_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Product with this id doesn't Exists!")

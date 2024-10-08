@@ -13,7 +13,6 @@ class OrderItemCreate(OurModelClass):
     quantity: int
 
 class OrderCreate(OurModelClass):
-    user_id: int
     order_items: List[OrderItemCreate]
     order_date: datetime
     payment_method: str

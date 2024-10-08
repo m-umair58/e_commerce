@@ -20,23 +20,21 @@ class RatingServices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Rating with this id doesn't exists!")
         return rating_data
         
-    def create_rating(product_id, user_id, details, score, files, db):
-    # Check if the score is within the valid range
+    def create_rating(product_id, user_id, details, score, files, user_data, db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only Users can update products")
         if score < 1 or score > 5:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Score must be between 1-5")
 
-        # Check if the product exists
         product_details = product_queries.get_product_by_id(product_id, db)
         if product_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-        # Initialize an empty list for image URLs
         image_urls = []
 
-        # Check if files were uploaded, and upload each file to Cloudinary
-        if files:  # Ensure files is not None or an empty list
+        if files:
             for file in files:
-                if file:  # Ensure file is not empty
+                if file: 
                     upload_result = cloudinary.uploader.upload(file.file)
                     image_urls.append(upload_result.get("secure_url"))
 
@@ -48,18 +46,24 @@ class RatingServices:
             details=details,
             rating_points=score
         )
-        
+
         rating_queries.add_rating(new_rating, db)
 
         return {"Details": "New rating has been added"}
 
     
-    def update_rating(product_id,user_id,details,score,files,db):
+    def update_rating(product_id,user_id,details,score,files,user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only Users can update products")
         rating_details = rating_queries.get_rating_by_id(id,db)
 
         if rating_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Rating with this id doesn't Exists!")
         
+        if rating_details.user_id != user_data['user_id']:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="This user has not posted this rating! ")
+
+
         image_urls = []
         for file in files:
             upload_result = cloudinary.uploader.upload(file.file)
@@ -76,10 +80,16 @@ class RatingServices:
 
         return {"Details":"Rating details have been updated"}
     
-    def delete_rating(rating_id,db):
+    def delete_rating(rating_id,user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only Users can update products")
+
         rating_details = rating_queries.get_rating_by_id(rating_id,db)
         if rating_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Rating with this id doesn't Exists!")
+
+        if rating_details.user_id != user_data['user_id']:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="This user has not posted this rating! ")
 
         rating_queries.delete_rating(rating_details,db)
 
