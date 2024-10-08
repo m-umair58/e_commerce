@@ -13,8 +13,10 @@ def verify_password(plain_password,hashed_password):
     return bcrypt_context.verify(plain_password,hashed_password)
 
 class AdminServices:
-    def get_admin_by_id(admin_id,db):
-        return admin_queries.get_admin_by_id(admin_id,db)
+    def get_admin_by_id(user_details,db):
+        if user_details['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admin can access this")
+        return admin_queries.get_admin_by_id(user_details['id'],db)
     
     def create_admin(admin:AdminCreate,db):
         admin_data= admin_queries.get_admin_by_email(admin.email,db)
@@ -34,7 +36,9 @@ class AdminServices:
         )
         return return_admin
     
-    def update_admin(admin:AdminData,db):
+    def update_admin(admin:AdminData,user_details,db):
+        if user_details['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admin can access this")
         admin_data= admin_queries.get_admin_by_email(admin.email,db)
         if not admin_data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Admin with this email doesn't exists!")
@@ -47,7 +51,9 @@ class AdminServices:
 
         return {"Details":"Admin has been updated"}
     
-    def delete_admin(admin_id,db):
+    def delete_admin(admin_id,user_details,db):
+        if user_details['is_admin'] is False:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only admin can access this")
         admin_data= admin_queries.get_admin_by_id(admin_id,db)
         if not admin_data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Admin with this email doesn't exists!")

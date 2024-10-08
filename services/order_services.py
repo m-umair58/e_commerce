@@ -15,6 +15,8 @@ class OrderServices:
         order_items_details = order_item_queries.get_order_item_by_order_id(order_details.id,db)
         return order_details,order_items_details
     def create_order(order:OrderCreate,user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only users can create order")
         total_amount = 0
         new_order = Order(
             user_id=user_data["id"],
@@ -60,6 +62,8 @@ class OrderServices:
         return new_order
     
     def delete_order(order_id,user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only users can create order")
         order_details = order_queries.get_order_by_id(order_id,db)
         if order_details is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Order doesn't exists")

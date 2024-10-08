@@ -13,8 +13,10 @@ def verify_password(plain_password,hashed_password):
     return bcrypt_context.verify(plain_password,hashed_password)
 
 class UserServices:
-    def get_user_by_id(user_id,db):
-        user_data = user_queries.get_user_by_id(user_id,db)
+    def get_user_by_id(user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only user can access this")
+        user_data = user_queries.get_user_by_id(user_data['id'],db)
         if user_data is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User with this id doesn't exists!")
     
@@ -40,7 +42,9 @@ class UserServices:
         )
         return return_user
     
-    def update_user(user:UserCreate,db):
+    def update_user(user:UserCreate,user_data,db):
+        if user_data['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only user can access this")
         user_data= user_queries.get_user_by_email(user.email,db)# shlould be changes using id
         if not user_data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User with this email doesn't exists!")
@@ -55,7 +59,9 @@ class UserServices:
 
         return {"Details":"User data has been updated"}
     
-    def delete_user(user_id,db):
+    def delete_user(user_id,user_details,db):
+        if user_details['is_admin'] is True:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Only user can access this")
         user_data= user_queries.get_user_by_id(user_id,db)
         if not user_data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User with this id doesn't exists!")
